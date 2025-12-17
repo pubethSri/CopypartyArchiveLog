@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copyparty Tattle-tale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f5f5f4; }
+        ::-webkit-scrollbar-thumb { background: #d97706; border-radius: 4px; }
+        
+        .grain {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-[#f3e9d2] text-amber-900 font-mono p-10 h-screen flex flex-col relative overflow-hidden">
+
+    <div class="grain"></div>
+
+    <div class="mb-8 border-b-2 border-amber-800/50 pb-4 z-10">
+        <h1 class="text-4xl font-bold flex items-center gap-3 tracking-tighter uppercase" style="font-family: 'Courier New', monospace;">
+            <span class="text-amber-700">📜</span> Archive_Log_V2
+        </h1>
+        <p class="text-amber-800 mt-2 text-sm italic opacity-80">
+            // Categorizing incoming data streams...
+        </p>
+    </div>
+
+    <div class="flex-1 overflow-auto bg-[#fdfbf7] rounded border-2 border-amber-800 shadow-[4px_4px_0px_rgba(120,53,15,0.2)] z-10">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-amber-200 text-amber-900 sticky top-0 border-b-2 border-amber-800">
+                <tr>
+                    <th class="p-4 border-r border-amber-800/20">TIMESTAMP</th>
+                    <th class="p-4 border-r border-amber-800/20">FILENAME</th>
+                    <th class="p-4 border-r border-amber-800/20">SIZE</th>
+                    <th class="p-4">CATEGORY</th>
+                </tr>
+            </thead>
+            <tbody id="log-container" class="divide-y divide-amber-800/20">
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-4 text-xs text-center text-amber-800/60 font-serif z-10">
+        COPYPARTY RECORDS, THIS SERVER IS OWN BY CRUZ
+    </div>
+
+    <script>
+        const tableBody = document.getElementById('log-container');
+        const badgeStyles = {
+            'Audio':      'border-blue-800 text-blue-900 bg-blue-100',
+            'Image':      'border-purple-800 text-purple-900 bg-purple-100',
+            'Gif':        'border-pink-800 text-pink-900 bg-pink-100',
+            'Scripts':    'border-green-800 text-green-900 bg-green-100',
+            'Text':       'border-gray-600 text-gray-800 bg-gray-200',
+            'Suspicious': 'border-red-800 text-red-900 bg-red-100',
+            'File':       'border-amber-800 text-amber-900 bg-amber-200'
+        };
+
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/api/logs');
+                const logs = await response.json();
+
+                tableBody.innerHTML = '';
+
+                logs.forEach(log => {
+                    const style = badgeStyles[log.category] || badgeStyles['File'];
+
+                    const rowHTML = `
+                        <tr class="hover:bg-amber-100 transition-colors animate-fade-in">
+                            <td class="p-4 text-sm font-bold opacity-70 border-b border-amber-800/10">${log.timestamp}</td>
+                            <td class="p-4 font-bold text-lg border-b border-amber-800/10 text-amber-900">${log.filename}</td>
+                            <td class="p-4 font-mono border-b border-amber-800/10">${log.size}</td>
+                            <td class="p-4 border-b border-amber-800/10">
+                                <span class="border px-2 py-1 rounded-sm text-xs font-bold uppercase tracking-widest ${style}">
+                                    ${log.category}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    tableBody.innerHTML += rowHTML;
+                });
+
+            } catch (err) {
+                console.error("Error fetching logs:", err);
+            }
+        }
+        fetchLogs();
+        setInterval(fetchLogs, 2000);
+
+    </script>
+</body>
+</html>
