@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCHIVE_LOG_V2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#FDFBF7',
+                        ink: '#1A1A1A',
+                        'ink-faded': '#4a4a4a',
+                        alert: '#B44327',
+                        midnight: '#2C3E50',
+
+                        // Dark Mode Palette
+                        'dark-paper': '#0c0a09',
+                        'dark-ink': '#e7e5e4',
+                        'dark-ink-faded': '#a8a29e',
+                        'dark-alert': '#ef4444',
+                        'dark-midnight': '#1e293b'
+                    },
+                    fontFamily: {
+                        header: ['"Special Elite"', 'cursive'],
+                        mono: ['"VT323"', 'monospace'],
+                    },
+                    animation: {
+                        'scan': 'scan 8s linear infinite',
+                    },
+                    keyframes: {
+                        scan: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FDFBF7;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            color: #1A1A1A;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dark body {
+            background-color: #0c0a09;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            color: #e7e5e4;
+        }
+
+        .scanline::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.02) 50%);
+            background-size: 100% 4px;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .dark .scanline::before {
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(255, 255, 255, 0.02) 50%);
+        }
+
+        .scanline::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: rgba(18, 16, 16, 0.02);
+            opacity: 0;
+            z-index: 50;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.01;
+            }
+
+            50% {
+                opacity: 0.03;
+            }
+
+            100% {
+                opacity: 0.01;
+            }
+        }
+
+        .stamp {
+            mask-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.6'/%3E%3C/svg%3E");
+            mask-mode: alpha;
+        }
+    </style>
+    <script>
+        // Init Dark Mode
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+</head>
+
+<body
+    class="h-screen w-full overflow-hidden flex flex-col p-4 md:p-8 scanline selection:bg-alert selection:text-paper dark:selection:bg-dark-alert dark:selection:text-dark-paper transition-colors duration-300">
+
+    <!-- Top Bar -->
+    <header
+        class="flex justify-between items-start mb-6 border-b-2 border-ink dark:border-dark-ink pb-4 flex-wrap gap-4 transition-colors duration-300">
+        <div class="flex flex-col">
+            <h1
+                class="font-header text-4xl md:text-5xl uppercase tracking-widest text-ink dark:text-dark-ink flex items-center gap-3 transition-colors duration-300">
+                <i data-lucide="archive" class="w-10 h-10 text-alert dark:text-dark-alert"></i>
+                <span class="relative">
+                    Archive_Log
+                    <span
+                        class="absolute -top-3 -right-6 text-xs font-mono bg-alert dark:bg-dark-alert text-paper dark:text-dark-paper px-1 rotate-12 transform shadow-sm">V2.0</span>
+                </span>
+            </h1>
+            <p
+                class="font-mono text-ink-faded dark:text-dark-ink-faded text-lg mt-1 tracking-wider uppercase flex items-center gap-2">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                Clearance Level: UNRESTRICTED
+            </p>
+        </div>
+
+        <div class="flex flex-col items-end">
+            <div class="flex gap-4 items-center">
+                <button id="theme-toggle"
+                    class="p-2 border-2 border-ink dark:border-dark-ink bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink shadow-[2px_2px_0px_#1A1A1A] dark:shadow-[2px_2px_0px_#e7e5e4] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all"
+                    title="Toggle Light/Dark Mode">
+                    <i data-lucide="moon" class="block dark:hidden w-5 h-5"></i>
+                    <i data-lucide="sun" class="hidden dark:block w-5 h-5"></i>
+                </button>
+
+                <div
+                    class="border-2 border-ink dark:border-dark-ink p-2 px-4 shadow-[4px_4px_0px_#1A1A1A] dark:shadow-[4px_4px_0px_#e7e5e4] bg-paper dark:bg-dark-paper transform rotate-1 transition-all hover:rotate-0">
+                    <p
+                        class="font-header text-alert dark:text-dark-alert text-xl uppercase tracking-widest text-center leading-none">
+                        Confidential</p>
+                    <p
+                        class="font-mono text-[10px] text-center uppercase border-t border-alert dark:border-dark-alert mt-1 pt-1 text-alert dark:text-dark-alert">
+                        Eyes Only</p>
+                </div>
+            </div>
+            <div class="font-mono text-sm mt-2 text-ink-faded dark:text-dark-ink-faded" id="clock">
+                // SYNCING...
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main
+        class="flex-1 overflow-auto border-2 border-ink dark:border-dark-ink bg-[#faf9f6] dark:bg-[#1c1917] relative shadow-[8px_8px_0px_#2C3E50] dark:shadow-[8px_8px_0px_#000] transition-colors duration-300">
+        <!-- Ledger Header -->
+        <div
+            class="sticky top-0 bg-paper dark:bg-dark-paper border-b-2 border-ink dark:border-dark-ink z-20 grid grid-cols-12 text-sm md:text-base font-header uppercase tracking-wider text-ink dark:text-dark-ink transition-colors duration-300">
+            <div class="col-span-2 p-3 border-r border-ink/30 dark:border-dark-ink/30 flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4"></i> Time
+            </div>
+            <div class="col-span-5 p-3 border-r border-ink/30 dark:border-dark-ink/30 flex items-center gap-2">
+                <i data-lucide="file" class="w-4 h-4"></i> File Identity
+            </div>
+            <div class="col-span-2 p-3 border-r border-ink/30 dark:border-dark-ink/30 flex items-center gap-2">
+                <i data-lucide="hard-drive" class="w-4 h-4"></i> Size
+            </div>
+            <div class="col-span-3 p-3 flex items-center gap-2">
+                <i data-lucide="tag" class="w-4 h-4"></i> Classification
+            </div>
+        </div>
+
+        <!-- Ledger Body -->
+        <div id="log-container" class="font-mono text-lg divide-y divide-ink/20 dark:divide-dark-ink/20">
+            <!-- Content Injected Here -->
+        </div>
+
+        <!-- Empty State / Loading -->
+        <div id="loading"
+            class="hidden absolute inset-0 flex items-center justify-center bg-paper/80 dark:bg-dark-paper/80 backdrop-blur-sm z-30 transition-colors duration-300">
+            <div class="text-center font-mono animate-pulse text-ink dark:text-dark-ink">
+                <i data-lucide="loader-2"
+                    class="w-12 h-12 mb-4 animate-spin mx-auto text-alert dark:text-dark-alert"></i>
+                <p class="uppercase tracking-widest">Intercalating Data...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer
+        class="mt-4 flex justify-between items-center text-xs font-mono text-ink-faded dark:text-dark-ink-faded uppercase border-t border-ink/20 dark:border-dark-ink/20 pt-2 transition-colors duration-300">
+        <div class="flex items-center gap-4">
+            <span>Server: CRUZ-MAIN-01</span>
+            <span>Status: <span class="text-green-700 dark:text-green-500 font-bold">ONLINE</span></span>
+        </div>
+        <div>
+            Generated by Copyparty Tattle-tale // <span class="text-alert dark:text-dark-alert">DO NOT DISTRIBUTE</span>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Theme Toggle Logic
+        const toggleBtn = document.getElementById('theme-toggle');
+        toggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        });
+
+        // Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = `// ${now.toISOString()}`;
+        }, 1000);
+
+        const tableBody = document.getElementById('log-container');
+
+        // Badge Configurations with Dark Mode support
+        // Note: We use classes that might need conditional rendering or tailored tailwind classes
+        // Since these are injected as strings, we construct the class string carefully
+        const categoryConfig = {
+            'Audio': { icon: 'music', base: 'text-blue-900 bg-blue-100 border-blue-900', dark: 'dark:text-blue-200 dark:bg-blue-900/40 dark:border-blue-400' },
+            'Image': { icon: 'image', base: 'text-purple-900 bg-purple-100 border-purple-900', dark: 'dark:text-purple-200 dark:bg-purple-900/40 dark:border-purple-400' },
+            'Gif': { icon: 'film', base: 'text-pink-900 bg-pink-100 border-pink-900', dark: 'dark:text-pink-200 dark:bg-pink-900/40 dark:border-pink-400' },
+            'Scripts': { icon: 'terminal', base: 'text-emerald-900 bg-emerald-100 border-emerald-900', dark: 'dark:text-emerald-200 dark:bg-emerald-900/40 dark:border-emerald-400' },
+            'Text': { icon: 'file-text', base: 'text-stone-900 bg-stone-200 border-stone-600', dark: 'dark:text-stone-300 dark:bg-stone-800 dark:border-stone-500' },
+            'Suspicious': { icon: 'alert-triangle', base: 'text-red-900 bg-red-100 border-red-900', dark: 'dark:text-red-200 dark:bg-red-900/40 dark:border-red-400' },
+            'File': { icon: 'file', base: 'text-ink bg-amber-100 border-ink', dark: 'dark:text-dark-ink dark:bg-neutral-800 dark:border-dark-ink' }
+        };
+
+        async function fetchLogs() {
+            try {
+                // Show loading on first load if empty ? No, better silent poll
+
+                const response = await fetch('/api/logs');
+                const logs = await response.json();
+
+                // Simple check to avoid redraw if data is same (optimization optional)
+                // For now, full redraw to keep it simple and robust
+
+                tableBody.innerHTML = '';
+
+                if (logs.length === 0) {
+                    tableBody.innerHTML = `
+                        <div class="p-8 text-center text-ink-faded dark:text-dark-ink-faded italic">
+                            // NO RECORDS FOUND IN ARCHIVE
+                        </div>
+                    `;
+                    return;
+                }
+
+                logs.forEach(log => {
+                    const config = categoryConfig[log.category] || categoryConfig['File'];
+
+                    const rowHTML = `
+                        <div class="grid grid-cols-12 group hover:bg-ink/5 dark:hover:bg-dark-ink/10 transition-colors cursor-default">
+                            <div class="col-span-2 p-3 border-r border-ink/20 dark:border-dark-ink/20 text-ink-faded dark:text-dark-ink-faded text-sm flex items-center">
+                                ${log.timestamp}
+                            </div>
+                            <div class="col-span-5 p-3 border-r border-ink/20 dark:border-dark-ink/20 font-bold text-ink dark:text-dark-ink truncate flex items-center gap-2">
+                                <span class="opacity-0 group-hover:opacity-100 text-alert dark:text-dark-alert transition-opacity">></span>
+                                ${log.filename}
+                            </div>
+                            <div class="col-span-2 p-3 border-r border-ink/20 dark:border-dark-ink/20 text-ink-faded dark:text-dark-ink-faded text-sm flex items-center">
+                                ${log.size}
+                            </div>
+                            <div class="col-span-3 p-3 flex items-center">
+                                <span class="px-2 py-1 rounded-sm text-xs font-header uppercase tracking-widest border border-dashed flex items-center gap-2 w-max shadow-sm ${config.base} ${config.dark}">
+                                    <i data-lucide="${config.icon}" class="w-3 h-3"></i>
+                                    ${log.category}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+
+                    tableBody.innerHTML += rowHTML;
+                });
+
+                // Re-init icons for new content
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error("Error fetching logs:", err);
+            }
+        }
+
+        fetchLogs();
+        setInterval(fetchLogs, 2000);
+    </script>
+</body>
+
+</html>
